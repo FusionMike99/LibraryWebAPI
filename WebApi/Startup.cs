@@ -1,15 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Business;
+using Business.Interfaces;
+using Business.Services;
+using Data;
+using Data.Interfaces;
+using Data.Repositories;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 
 namespace WebApi
 {
@@ -22,13 +22,24 @@ namespace WebApi
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            string connection = Configuration.GetConnectionString("DefaultConnection");
+            services.AddDbContext<LibraryDbContext>(options =>
+                options.UseSqlServer(connection));
+            services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<ICardRepository, CardRepository>();
+            services.AddScoped<IHistoryRepository, HistoryRepository>();
+            services.AddScoped<IReaderRepository, ReaderRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddAutoMapper(typeof(AutomapperProfile));
+            services.AddScoped<IBookService, BookService>();
+            services.AddScoped<ICardService, CardService>();
+            services.AddScoped<IReaderService, ReaderService>();
+            services.AddScoped<IStatisticService, StatisticService>();
             services.AddControllers();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
@@ -42,7 +53,10 @@ namespace WebApi
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

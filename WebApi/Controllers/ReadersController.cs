@@ -1,4 +1,4 @@
-using Business.Interfaces;
+﻿using Business.Interfaces;
 using Business.Models;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -10,30 +10,22 @@ namespace WebApi.Controllers
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
-    public class BooksController : ControllerBase
+    public class ReadersController : ControllerBase
     {
-        private readonly IBookService bookService;
+        private readonly IReaderService readerService;
 
-        public BooksController(IBookService bookService)
+        public ReadersController(IReaderService readerService)
         {
-            this.bookService = bookService;
+            this.readerService = readerService;
         }
 
-        //GET: /api/books/?Author=Jon%20Snow&Year=1996
+        //GET: /api/readers/
         [HttpGet]
-        public ActionResult<IEnumerable<BookModel>> GetByFilter([FromQuery] FilterSearchModel model)
+        public ActionResult<IEnumerable<ReaderModel>> Get()
         {
             try
             {
-                IEnumerable<BookModel> result;
-                if (string.IsNullOrEmpty(model.Author) || model.Year < 1)
-                {
-                    result = bookService.GetAll();
-                }
-                else
-                {
-                    result = bookService.GetByFilter(model);
-                }
+                var result = readerService.GetAll();
                 if (result == null)
                 {
                     return NotFound();
@@ -46,13 +38,33 @@ namespace WebApi.Controllers
             }
         }
 
-        //GET: /api/books/1
+        //GET: /api/readers/dontreturnbooks
+        [HttpGet]
+        [Route("[action]")]
+        public ActionResult<IEnumerable<ReaderModel>> DontReturnBooks()
+        {
+            try
+            {
+                var result = readerService.GetReadersThatDontReturnBooks();
+                if (result == null)
+                {
+                    return NotFound();
+                }
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        //GET: /api/readers/1
         [HttpGet("{id}")]
-        public async Task<ActionResult<IEnumerable<BookModel>>> GetById(int id)
+        public async Task<ActionResult<IEnumerable<ReaderModel>>> GetById(int id)
         {
             try
             {
-                var result = await bookService.GetByIdAsync(id);
+                var result = await readerService.GetByIdAsync(id);
                 if (result == null)
                 {
                     return NotFound();
@@ -65,18 +77,18 @@ namespace WebApi.Controllers
             }
         }
 
-        //POST: /api/books/
-        [HttpPost]
-        public async Task<ActionResult> Add([FromBody] BookModel bookModel)
+        //POST: /api/readers/
+        [HttpPost("{id?}")]
+        public async Task<ActionResult> Add([FromBody] ReaderModel readerModel)
         {
-            if (bookModel == null)
+            if (readerModel == null)
             {
                 return BadRequest();
             }
             try
             {
-                await bookService.AddAsync(bookModel);
-                return CreatedAtAction(nameof(Add), new { bookModel.Id }, bookModel);
+                await readerService.AddAsync(readerModel);
+                return CreatedAtAction(nameof(Add), new { id = readerModel.Id }, readerModel);
             }
             catch (Exception ex)
             {
@@ -84,18 +96,18 @@ namespace WebApi.Controllers
             }
         }
 
-        //PUT: /api/books/
+        //PUT: /api/readers/
         [HttpPut]
-        public async Task<ActionResult> Update(BookModel bookModel)
+        public async Task<ActionResult> Update(ReaderModel readerModel)
         {
-            if (bookModel == null)
+            if (readerModel == null)
             {
                 return BadRequest();
             }
             try
             {
-                await bookService.UpdateAsync(bookModel);
-                return Ok(bookModel);
+                await readerService.UpdateAsync(readerModel);
+                return Ok(readerModel);
             }
             catch (Exception ex)
             {
@@ -103,13 +115,13 @@ namespace WebApi.Controllers
             }
         }
 
-        //DELETE: /api/books/1
+        //DELETE: /api/readers/1
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
             try
             {
-                await bookService.DeleteByIdAsync(id);
+                await readerService.DeleteByIdAsync(id);
                 return NoContent();
             }
             catch (Exception ex)
