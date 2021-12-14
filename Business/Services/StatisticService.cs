@@ -57,14 +57,14 @@ namespace Business.Services
                 .ToList();
 
             var models = histories
-                .GroupBy(h => h.Card.ReaderId)
+                .GroupBy(h => new { Id = h.Card.ReaderId, Name = h.Card.Reader.Name } )
                 .OrderByDescending(g => g.Count())
                 .Take(readersCount)
                 .Select(m => new ReaderActivityModel
                 {
-                    ReaderId = m.Key,
+                    ReaderId = m.Key.Id,
                     BooksCount = m.Count(),
-                    ReaderName = m.ElementAt(0).Card.Reader.Name
+                    ReaderName = m.Key.Name
                 });
 
             return models;
