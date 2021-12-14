@@ -53,7 +53,7 @@ namespace Business.Services
         public IEnumerable<ReaderActivityModel> GetReadersWhoTookTheMostBooks(int readersCount, DateTime firstDate, DateTime lastDate)
         {
             var histories = unitOfWork.HistoryRepository.GetAllWithDetails()
-                .Where(h => h.TakeDate >= firstDate && h.TakeDate <= lastDate)
+                .Where(h => h.ReturnDate >= firstDate && h.ReturnDate <= lastDate)
                 .ToList();
 
             var models = histories

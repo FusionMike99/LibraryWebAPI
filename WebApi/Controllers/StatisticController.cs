@@ -46,7 +46,7 @@ namespace WebApi.Controllers
         {
             try
             {
-                var result = statisticService.GetReadersWhoTookTheMostBooks(readersCount - 1, firstDate, lastDate);
+                var result = statisticService.GetReadersWhoTookTheMostBooks(readersCount, firstDate, lastDate);
                 if (result == null)
                 {
                     return NotFound();
