@@ -35,14 +35,10 @@ namespace Business.Services
         public IEnumerable<BookModel> GetMostPopularBooks(int bookCount)
         {
             var histories = unitOfWork.HistoryRepository.GetAllWithDetails();
-            var grouped = histories.GroupBy(h => h.BookId).Select(h => new
-            {
-                BookId = h.Key,
-                BookCount = h.Count()
-            })
-                .OrderByDescending(m => m.BookCount)
-                .Select(m => m.BookId)
-                .Take(bookCount);
+            var grouped = histories.GroupBy(h => h.BookId)
+                .OrderByDescending(m => m.Count())
+                .Take(bookCount)
+                .Select(m => m.Key);
 
             var elements = grouped.Select(id => histories.First(h => h.BookId == id).Book);
 
@@ -53,8 +49,7 @@ namespace Business.Services
         public IEnumerable<ReaderActivityModel> GetReadersWhoTookTheMostBooks(int readersCount, DateTime firstDate, DateTime lastDate)
         {
             var histories = unitOfWork.HistoryRepository.GetAllWithDetails()
-                .Where(h => h.ReturnDate >= firstDate && h.ReturnDate <= lastDate)
-                .ToList();
+                .Where(h => h.ReturnDate >= firstDate && h.ReturnDate <= lastDate);
 
             var models = histories
                 .GroupBy(h => new { Id = h.Card.ReaderId, Name = h.Card.Reader.Name } )
